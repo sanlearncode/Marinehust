@@ -1,9 +1,14 @@
+#define _CRT_SECURE_NO_WARNINGS
 #include <iostream>
 #include <string>
 #include <SDL.h>
 #include <SDL_image.h>
 #include <SDL_mixer.h>
 #include <SDL_ttf.h>
+
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif
 
 using namespace std;
 
@@ -72,7 +77,7 @@ public:
             }
             SDL_FreeSurface(loadsurface);
         }
-
+        
     }
 
     void Show(SDL_Renderer* des, SDL_Rect* clip) {
@@ -115,7 +120,7 @@ private:
     Map game_map_;
     TileMap tile_mat[MAX_TILE];
 public:
-    GameMap(SDL_Renderer* g_screen) {
+    GameMap(SDL_Renderer* g_screen) { 
         game_map_.start_x_ = game_map_.start_y_ = 0;
         LoadTiles(g_screen);
         LoadMap("resources/map/map.dat");
@@ -124,8 +129,7 @@ public:
 
     void LoadMap(string path) {
         const char* name = path.c_str();
-        FILE* fp = NULL;
-        fopen_s(&fp, name, "rb");
+        FILE* fp = fopen(name, "rb");
         if (fp == NULL) {
             return;
         }
@@ -133,7 +137,7 @@ public:
         game_map_.max_y_ = 0;
         for (int i = 0; i < MAX_MAP_Y; i++) {
             for (int j = 0; j < MAX_MAP_X; j++) {
-                fscanf_s(fp, "%d", &game_map_.tile[i][j]);
+                fscanf(fp, "%d", &game_map_.tile[i][j]);
                 int val = game_map_.tile[i][j];
                 if (val > 0) {
                     if (j > game_map_.max_x_) {
@@ -156,12 +160,11 @@ public:
 
     void LoadTiles(SDL_Renderer* screen) {
         char file_img[30];
-        FILE* fp = NULL;
 
         for (int i = 0; i < MAX_TILE; i++) {
-            sprintf_s(file_img, "resources/map/%d.png", i);
+            snprintf(file_img, sizeof(file_img), "resources/map/%d.png", i);
 
-            fopen_s(&fp, file_img, "rb");
+            FILE* fp = fopen(file_img, "rb");
             if (fp == NULL) {
                 continue;
             }
@@ -224,7 +227,7 @@ private:
 public:
     Character(SDL_Renderer* screen) {
         x = 100;
-        y = 270;
+        y = 270 ;
         x_val = y_val = 0;
         width_frame = height_frame = 0;
         frame = 0;
@@ -313,20 +316,20 @@ public:
             y_val = -y_val;
         }
 
-        x1 = (x + x_val) / TILE_SIZE;
-        x2 = (x + width_frame + x_val - 1) / TILE_SIZE;
+        x1 = (x + x_val ) / TILE_SIZE;
+        x2 = (x + width_frame + x_val -1 ) / TILE_SIZE;
         y1 = (y + y_val) / TILE_SIZE;
-        y2 = (y + height_frame - 1) / TILE_SIZE;
+        y2 = (y + height_frame -1 ) / TILE_SIZE;
 
         if (x1 >= 0 && x2 < MAX_MAP_X && y1 >= 0 && y2 < MAX_MAP_Y) {
             if (statue == UP) {
-                y1 = (y + 1) / TILE_SIZE;
+                y1 = (y+1) / TILE_SIZE;
             }
             if (map_data.tile[y1][x2] == 4 || map_data.tile[y2][x2] == 4) {
                 Mix_PlayChannel(-1, win, 0);
                 map_data.tile[y1][x2] = 0;
                 map_data.tile[y2][x2] = 0;
-
+                
             }
             if (map_data.tile[y1][x2] == 5 || map_data.tile[y2][x2] == 5) {
                 Mix_PlayChannel(-1, point, 0);
@@ -339,18 +342,18 @@ public:
                 x = x - width_frame + 1;
                 x_val = 0;
             }
-
+            
         }
 
         x1 = x / TILE_SIZE;
-        x2 = (x + TILE_SIZE) / TILE_SIZE;
+        x2 = (x + TILE_SIZE ) / TILE_SIZE;
         y1 = (y + y_val) / TILE_SIZE;
-        y2 = (y + height_frame) / TILE_SIZE;
+        y2 = (y + height_frame ) / TILE_SIZE;
         if (x1 >= 0 && x2 < MAX_MAP_X && y1 >= 0 && y2 < MAX_MAP_Y) {
             if (statue == DOWN) {
                 if (map_data.tile[y2][x1] != 0 || map_data.tile[y2][x2] != 0) {
                     y = y2 * TILE_SIZE;
-                    y = y - height_frame;
+                    y = y - height_frame ;
                     y_val = 0;
                 }
                 if (map_data.tile[y2][x1] == 5 || map_data.tile[y2][x2] == 5) {
@@ -362,7 +365,7 @@ public:
             }
             if (statue == UP) {
                 if (map_data.tile[y1][x1] != 0 || map_data.tile[y1][x2] != 0) {
-                    y = (y1 + 1) * TILE_SIZE - 1;
+                    y = (y1 + 1) * TILE_SIZE - 1 ;
                     y_val = 0;
                 }
                 if (map_data.tile[y1][x1] == 5 || map_data.tile[y1][x2] == 5) {
@@ -378,17 +381,17 @@ public:
         y += y_val;
         if (y_val < 0)y_val = -y_val;
         x += x_val;
-
-        if (x < map_x || y < 0 || y + height_frame > SCREEN_HEIGHT || x > map_x + SCREEN_WIDTH) {
-            gamestatue = GameOver;
+        
+        if (x < map_x || y < 0 || y + height_frame > SCREEN_HEIGHT || x > map_x + SCREEN_WIDTH ) {
+            gamestatue= GameOver ;
         }
-
+        
     }
-
+    
     void MoveMap(Map& map_data) {
-
+        
         map_data.start_x_ += 6;
-
+        
         if (map_data.start_x_ + SCREEN_WIDTH >= map_data.max_x_) {
             map_data.start_x_ = map_data.max_x_ - SCREEN_WIDTH;
         }
@@ -486,7 +489,7 @@ public:
 StartScreen* startscreen;
 
 
-class OverScreen : public BaseObject {
+class OverScreen : public BaseObject{
 private:
     SDL_Texture* gameOverTexture;
     SDL_Texture* restartButtonTexture;
@@ -505,7 +508,7 @@ public:
         tempSurface = IMG_Load("resources/image/quit.png");
         quitButtonTexture = SDL_CreateTextureFromSurface(screen, tempSurface);
         SDL_FreeSurface(tempSurface);
-
+        
         tempSurface = IMG_Load("resources/image/gameover.png");
         gameOverTexture = SDL_CreateTextureFromSurface(screen, tempSurface);
         SDL_FreeSurface(tempSurface);
@@ -514,7 +517,7 @@ public:
         skinTexture = SDL_CreateTextureFromSurface(screen, tempSurface);
         SDL_FreeSurface(tempSurface);
 
-        int w, h;
+        int w,h;
         SDL_QueryTexture(gameOverTexture, nullptr, nullptr, &w, &h);
         gameOverRect = { SCREEN_WIDTH / 2 - w / 2 , 200, w, h };
 
@@ -525,15 +528,15 @@ public:
         quitButtonRect = { 350, 400, 128, 64 };
 
         SDL_QueryTexture(skinTexture, nullptr, nullptr, &w, &h);
-        skinRect = { SCREEN_WIDTH / 2 - w / 2, 400, w, h };
+        skinRect = { SCREEN_WIDTH  /2 - w / 2, 400, w, h };
     }
-
+    
     ~OverScreen() {
         SDL_DestroyTexture(gameOverTexture);
         SDL_DestroyTexture(restartButtonTexture);
         SDL_DestroyTexture(quitButtonTexture);
         SDL_DestroyTexture(skinTexture);
-
+        
     }
 
     void Show(SDL_Renderer* des) {
@@ -659,7 +662,7 @@ public:
     void LoadText(TTF_Font* font, SDL_Renderer* screen) {
         Free();
         SDL_Surface* textSurface = TTF_RenderText_Solid(font, text.c_str(), color);
-        if (textSurface)
+        if(textSurface)
         {
             texture = SDL_CreateTextureFromSurface(screen, textSurface);
             w = textSurface->w;
@@ -691,16 +694,16 @@ Text* text;
 
 //ham khoi tao game
 void InitData() {
-    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0) {
+    if (SDL_Init(SDL_INIT_VIDEO|SDL_INIT_AUDIO)<0) {
         cout << "khong khoi tao duoc SDL " << SDL_GetError() << endl;
     }
     if (!(IMG_Init(IMG_INIT_PNG) && IMG_INIT_PNG)) {
         cout << "khong khoi tao duoc SDL image " << IMG_GetError() << endl;
     }
-    if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0) {
+    if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0){
         cout << "khong khoi tao duoc nhac " << Mix_GetError();
     }
-    if (TTF_Init() == -1) {
+    if (TTF_Init() == -1){
         cout << "khong khoi tao duoc font chu " << TTF_GetError();
     }
 
@@ -708,8 +711,8 @@ void InitData() {
     SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
 
     g_window = SDL_CreateWindow("Marinehust",
-        SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-        SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
+                                 SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+                                 SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
     g_screen = SDL_CreateRenderer(g_window, -1, SDL_RENDERER_ACCELERATED);
     g_font = TTF_OpenFont("resources/font/font.ttf", 20);
     g_music = Mix_LoadMUS("resources/sound/music.mp3");
@@ -717,7 +720,7 @@ void InitData() {
     point = Mix_LoadWAV("resources/sound/point.wav");
     win = Mix_LoadWAV("resources/sound/win.wav");
     g_background.LoadImg("resources/image/background1.png", g_screen);
-
+    
     text = new Text;
     player = new Character(g_screen);
     gamemap = new GameMap(g_screen);
@@ -727,11 +730,11 @@ void InitData() {
 }
 
 //ham xu ly du lieu nhap vao
-void HandleEvent(SDL_Event& event) {
+void HandleEvent(SDL_Event &event) {
     if (gamestatue == GameStart) {
         startscreen->HandleInput(event);
     }
-    else if (gamestatue == GameRunning) {
+    else if(gamestatue == GameRunning){
         player->HandleInput(event);
     }
     else if (gamestatue == GameOver) {
@@ -740,7 +743,7 @@ void HandleEvent(SDL_Event& event) {
     else if (gamestatue == GameSkin) {
         skinscreen->HandleInput(event);
     }
-
+    
 }
 
 //ham tinh toan, xu ly va cham
@@ -754,7 +757,7 @@ void Update() {
 }
 
 //ham hien thi len man hinh
-void Show() {
+void Show(){
     SDL_SetRenderDrawColor(g_screen, 0Xff, 0Xff, 0Xff, 0Xff);
     SDL_RenderClear(g_screen);
 
@@ -776,7 +779,7 @@ void Show() {
     else if (gamestatue == GameSkin) {
         skinscreen->Show(g_screen);
     }
-
+    
     SDL_RenderPresent(g_screen);
 }
 
@@ -804,25 +807,43 @@ void Close() {
     SDL_Quit(); IMG_Quit(); Mix_Quit(); TTF_Quit();
 }
 
+//ham main loop - duoc goi 1 lan moi frame
+//(tach rieng de Emscripten co the goi lai moi frame qua requestAnimationFrame)
+void MainLoop() {
+    while (SDL_PollEvent(&g_event) != 0) {
+        if (g_event.type == SDL_QUIT) {
+            AppRunning = false;
+        }
+        HandleEvent(g_event);
+    }
+
+    Update();
+    Show();
+
+#ifdef __EMSCRIPTEN__
+    if (!AppRunning) {
+        Close();
+        emscripten_cancel_main_loop();
+    }
+#endif
+}
+
 //ham main
 int main(int argc, char* argv[]) {
 
     InitData();
     Mix_PlayMusic(g_music, -1);
 
+#ifdef __EMSCRIPTEN__
+    // fps = 0 -> de trinh duyet tu dong bo theo requestAnimationFrame (muot hon)
+    // simulate_infinite_loop = 1 -> tra quyen dieu khien ve cho browser, khong bi treo tab
+    emscripten_set_main_loop(MainLoop, 0, 1);
+#else
     while (AppRunning)
     {
         Uint32 starttick = SDL_GetTicks();
 
-        while (SDL_PollEvent(&g_event) != 0) {
-            if (g_event.type == SDL_QUIT) {
-                AppRunning = false;
-            }
-            HandleEvent(g_event);
-        }
-
-        Update();
-        Show();
+        MainLoop();
 
         //xu ly FPS;
         if (SDL_GetTicks() - starttick < FPS) {
@@ -830,5 +851,7 @@ int main(int argc, char* argv[]) {
         }
     }
     Close();
+#endif
+
     return 0;
 }
