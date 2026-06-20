@@ -1,0 +1,57 @@
+name: Build and Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [ "master" ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Emscripten
+        uses: mymindstorm/setup-emsdk@v14
+        with:
+          version: 3.1.64
+
+      - name: Build game with Emscripten
+        run: |
+          mkdir -p dist
+          emcc Main.cpp -o dist/index.html \
+            -sUSE_SDL=2 \
+            -sUSE_SDL_IMAGE=2 \
+            -sUSE_SDL_TTF=2 \
+            -sUSE_SDL_MIXER=2 \
+            -sSDL2_IMAGE_FORMATS='["png"]' \
+            --preload-file resources \
+            -sALLOW_MEMORY_GROWTH=1 \
+            -sNO_EXIT_RUNTIME=1 \
+            -O2
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
