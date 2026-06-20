@@ -10,15 +10,15 @@ MARINEHUST hướng đến đối tượng là **sinh viên và giảng viên Đ
 
 ## ✨ Tính năng
 
-- 🔄 Cơ chế đổi trọng lực bằng phím **Space** hoặc **click chuột**.
-- 🐹 Chọn nhân vật theo 3 skin: **Capybara**, **Cua**, **Cá voi**.
-- 🪙 Thu thập xu và vượt chướng ngại vật trên hành trình.
-- 🎵 Nhạc nền và hiệu ứng âm thanh sống động.
+🔄 Cơ chế đổi trọng lực bằng phím **Space** hoặc **click chuột**.
+🐹 Chọn nhân vật theo 3 skin: **Capybara**, **Cua**, **Cá voi**.
+🪙 Thu thập xu và vượt chướng ngại vật trên hành trình.
+🎵 Nhạc nền và hiệu ứng âm thanh sống động.
 
 ## 🤝 Đóng góp
 
 Mọi ý kiến đóng góp, báo lỗi hoặc đề xuất tính năng đều được hoan nghênh! Vui lòng liên hệ qua email hathaisan2006@gmail.com
 
 Sản phẩm của Nhóm 14 — Lớp 156395, Đại học Bách Khoa Hà Nội, được xây dựng và phát triển bởi:
-- **Chu Xuân Đạt**
-- **Hà Thái San**
+**Chu Xuân Đạt**
+**Hà Thái San**

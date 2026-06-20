@@ -1,0 +1,21 @@
+# Build output (Emscripten)
+dist/
+
+# Emscripten SDK (neu ban clone emsdk vao trong project de test local)
+emsdk/
+
+# Visual Studio / Windows build artifacts
+.vs/
+x64/
+x86/
+Debug/
+Release/
+*.obj
+*.exe
+*.pdb
+*.ilk
+*.sln.docstates
+
+# OS junk
+.DS_Store
+Thumbs.db
